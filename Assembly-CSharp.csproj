@@ -52,8 +52,7 @@
   </PropertyGroup>
   <ItemGroup>
      <Compile Include="Assets\Scripts\CharacterController2D.cs" />
-     <Compile Include="Assets\Scripts\CharacterMovement.cs" />
-     <Compile Include="Assets\Scripts\CharacterStatus.cs" />
+     <Compile Include="Assets\Scripts\Movement2D.cs" />
  <Reference Include="UnityEngine">
  <HintPath>E:/Unity/2020.2.0a8/Editor/Data/Managed/UnityEngine/UnityEngine.dll</HintPath>
  </Reference>

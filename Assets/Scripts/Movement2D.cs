@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
-public class CharacterStatus : MonoBehaviour {
+public class Movement2D : MonoBehaviour {
 
     private Rigidbody2D rb;
     
