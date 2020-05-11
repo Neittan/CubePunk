@@ -1,0 +1,68 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!78 &1
+TagManager:
+  serializedVersion: 2
+  tags:
+  - Platform
+  layers:
+  - Default
+  - TransparentFX
+  - Ignore Raycast
+  - 
+  - Water
+  - UI
+  - 
+  - 
+  - Player
+  - Background
+  - Cameras
+  - Platform
+  - Ladder
+  - LadderTop
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  m_SortingLayers:
+  - name: Default
+    uniqueID: 0
+    locked: 0
+  - name: SkyBG
+    uniqueID: 333821685
+    locked: 0
+  - name: FarBG
+    uniqueID: 1470979653
+    locked: 0
+  - name: NearBG
+    uniqueID: 1956490463
+    locked: 0
+  - name: Building
+    uniqueID: 1161622551
+    locked: 0
+  - name: Platform
+    uniqueID: 3288488015
+    locked: 0
+  - name: Ladder
+    uniqueID: 3370839127
+    locked: 0
+  - name: Player
+    uniqueID: 485733365
+    locked: 0
+  - name: Foreground
+    uniqueID: 508876439
+    locked: 0
