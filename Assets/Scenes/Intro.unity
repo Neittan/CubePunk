@@ -1989,7 +1989,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 519420028}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 17.82, y: 6.936, z: -10}
+  m_LocalPosition: {x: 5.9799995, y: 11.2, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 499583402}
@@ -13235,7 +13235,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 816988588}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: -0.31700003, z: 0}
+  m_LocalPosition: {x: 0, y: -0.289, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 255889267}
@@ -14333,10 +14333,11 @@ GameObject:
   - component: {fileID: 894563105}
   - component: {fileID: 894563104}
   - component: {fileID: 894563103}
-  - component: {fileID: 894563107}
-  - component: {fileID: 894563109}
   - component: {fileID: 894563108}
   - component: {fileID: 894563106}
+  - component: {fileID: 894563107}
+  - component: {fileID: 894563110}
+  - component: {fileID: 894563109}
   m_Layer: 8
   m_Name: Player
   m_TagString: Player
@@ -14422,7 +14423,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 894563102}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 17.82, y: 6.356, z: 0}
+  m_LocalPosition: {x: 5.98, y: 10.62, z: 0}
   m_LocalScale: {x: 4, y: 4, z: 1}
   m_Children:
   - {fileID: 255889267}
@@ -14441,10 +14442,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e9c158457bd4ef345b7815a68b852a6c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  UpperBodyTrigger: {fileID: 894563109}
   HandsCheck: {fileID: 555967717}
   GroundCheck: {fileID: 816988589}
   UnderGroundCheck: {fileID: 649353300}
-  groundCheckDistance: 0.1
+  groundCheckDistance: 0.21
   climbCheckDistance: 1
   WhatIsGround:
     serializedVersion: 2
@@ -14454,6 +14456,7 @@ MonoBehaviour:
     m_Bits: 12288
   isFacingRight: 0
   isGrounded: 0
+  isWalking: 0
   wasGrounded: 0
   isJumping: 0
   isClimbing: 0
@@ -14462,11 +14465,14 @@ MonoBehaviour:
   isCrouching: 0
   isDodging: 0
   isHurted: 0
-  isAscending: 0
-  isDescending: 0
-  LandingEvent:
-    m_PersistentCalls:
-      m_Calls: []
+  isFalling: 0
+  inJumpSpeedMult: 0.7
+  extraJumps: 0
+  extraJumpHeightMult: 0.7
+  walkMult: 0.5
+  velocityDeadZone: 1
+  isClimable: 0
+  wasClimable: 0
 --- !u!50 &894563107
 Rigidbody2D:
   serializedVersion: 4
@@ -14479,14 +14485,14 @@ Rigidbody2D:
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
-  m_Mass: 10
+  m_Mass: 5
   m_LinearDrag: 0
   m_AngularDrag: 0.05
   m_GravityScale: 1
   m_Material: {fileID: 6200000, guid: 08d4abd2785f51c4d9b9423e84b659d0, type: 2}
   m_Interpolate: 0
-  m_SleepingMode: 1
-  m_CollisionDetection: 0
+  m_SleepingMode: 0
+  m_CollisionDetection: 1
   m_Constraints: 4
 --- !u!114 &894563108
 MonoBehaviour:
@@ -14500,15 +14506,39 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f7c9409941ed6b440a04f872ac7446fe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  baseSpeed: 0
-  runMult: 2
-  jumpForce: 10
-  extraJumpForceMult: 0
-  inJumpSpeedMult: 0.7
-  baseClimbSpeed: 0
-  climbSideSpeed: 0
-  defaultGravity: 1
---- !u!70 &894563109
+  character: {fileID: 894563106}
+  moveSpeed: 0
+  jumpHeight: 6
+  climbSpeed: 0
+  xInput: 0
+  yInput: 0
+--- !u!61 &894563109
+BoxCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 894563102}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 0, y: -0.123588726}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0.5, y: 0.5}
+    oldSize: {x: 0.71, y: 0.67}
+    newSize: {x: 0.71, y: 0.67}
+    adaptiveTilingThreshold: 0.5
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  serializedVersion: 2
+  m_Size: {x: 0.12, y: 0.42217746}
+  m_EdgeRadius: 0
+--- !u!70 &894563110
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -14521,8 +14551,8 @@ CapsuleCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0, y: -0.1645}
-  m_Size: {x: 0.11446926, y: 0.34}
+  m_Offset: {x: 0, y: -0.175}
+  m_Size: {x: 0.12, y: 0.32}
   m_Direction: 0
 --- !u!1 &898988452
 GameObject:
@@ -14746,10 +14776,10 @@ PlatformEffector2D:
   m_RotationalOffset: 0
   m_UseOneWay: 1
   m_UseOneWayGrouping: 0
-  m_SurfaceArc: 180
+  m_SurfaceArc: 170
   m_UseSideFriction: 0
   m_UseSideBounce: 0
-  m_SideArc: 90
+  m_SideArc: 0
 --- !u!19719996 &898988457
 TilemapCollider2D:
   m_ObjectHideFlags: 0
@@ -14891,7 +14921,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1319924858}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 17.82, y: 6.936, z: -10}
+  m_LocalPosition: {x: 5.9799995, y: 11.2, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1499935135}
@@ -14935,7 +14965,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1438314710}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 3.3, y: 2.8, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1121680275}
