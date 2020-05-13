@@ -1989,7 +1989,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 519420028}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 5.9799995, y: 11.2, z: -10}
+  m_LocalPosition: {x: 15.139999, y: 10.71, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 499583402}
@@ -14334,10 +14334,11 @@ GameObject:
   - component: {fileID: 894563104}
   - component: {fileID: 894563103}
   - component: {fileID: 894563108}
-  - component: {fileID: 894563106}
+  - component: {fileID: 894563112}
   - component: {fileID: 894563107}
   - component: {fileID: 894563110}
   - component: {fileID: 894563109}
+  - component: {fileID: 894563111}
   m_Layer: 8
   m_Name: Player
   m_TagString: Player
@@ -14423,56 +14424,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 894563102}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 5.98, y: 10.62, z: 0}
+  m_LocalPosition: {x: 15.14, y: 10.13, z: 0}
   m_LocalScale: {x: 4, y: 4, z: 1}
   m_Children:
   - {fileID: 255889267}
   m_Father: {fileID: 0}
   m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &894563106
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 894563102}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e9c158457bd4ef345b7815a68b852a6c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  UpperBodyTrigger: {fileID: 894563109}
-  HandsCheck: {fileID: 555967717}
-  GroundCheck: {fileID: 816988589}
-  UnderGroundCheck: {fileID: 649353300}
-  groundCheckDistance: 0.21
-  climbCheckDistance: 1
-  WhatIsGround:
-    serializedVersion: 2
-    m_Bits: 10240
-  WhatIsLadder:
-    serializedVersion: 2
-    m_Bits: 12288
-  isFacingRight: 0
-  isGrounded: 0
-  isWalking: 0
-  wasGrounded: 0
-  isJumping: 0
-  isClimbing: 0
-  isClimbableUp: 0
-  isClimableDown: 0
-  isCrouching: 0
-  isDodging: 0
-  isHurted: 0
-  isFalling: 0
-  inJumpSpeedMult: 0.7
-  extraJumps: 0
-  extraJumpHeightMult: 0.7
-  walkMult: 0.5
-  velocityDeadZone: 1
-  isClimable: 0
-  wasClimable: 0
 --- !u!50 &894563107
 Rigidbody2D:
   serializedVersion: 4
@@ -14506,10 +14464,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f7c9409941ed6b440a04f872ac7446fe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  character: {fileID: 894563106}
-  moveSpeed: 0
+  character: {fileID: 894563112}
+  moveSpeed: 200
+  crouchSpeedMult: 0.5
+  inJumpSpeedMult: 0.7
+  walkSpeedMult: 0.6
   jumpHeight: 6
-  climbSpeed: 0
+  climbSpeed: 100
   xInput: 0
   yInput: 0
 --- !u!61 &894563109
@@ -14525,7 +14486,7 @@ BoxCollider2D:
   m_IsTrigger: 1
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0, y: -0.123588726}
+  m_Offset: {x: 0, y: 0.035}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
@@ -14536,7 +14497,7 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 0.12, y: 0.42217746}
+  m_Size: {x: 0.12, y: 0.1}
   m_EdgeRadius: 0
 --- !u!70 &894563110
 CapsuleCollider2D:
@@ -14554,6 +14515,61 @@ CapsuleCollider2D:
   m_Offset: {x: 0, y: -0.175}
   m_Size: {x: 0.12, y: 0.32}
   m_Direction: 0
+--- !u!61 &894563111
+BoxCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 894563102}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 0, y: -0.175}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0.5, y: 0.5}
+    oldSize: {x: 0.71, y: 0.67}
+    newSize: {x: 0.71, y: 0.67}
+    adaptiveTilingThreshold: 0.5
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  serializedVersion: 2
+  m_Size: {x: 0.12, y: 0.32}
+  m_EdgeRadius: 0
+--- !u!114 &894563112
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 894563102}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f52b11bc1696f9744a3270e89779331a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  BodyTrigger: {fileID: 894563111}
+  UpperBodyTrigger: {fileID: 894563109}
+  HandsCheck: {fileID: 555967717}
+  GroundCheck: {fileID: 816988589}
+  UnderGroundCheck: {fileID: 649353300}
+  groundCheckDistance: 0.21
+  climbCheckDistance: 1
+  WhatIsGround:
+    serializedVersion: 2
+    m_Bits: 10240
+  WhatIsLadder:
+    serializedVersion: 2
+    m_Bits: 12288
+  extraJumpHeightMult: 0.7
+  velocityDeadZone: 1
+  isClimable: 0
+  wasClimable: 0
 --- !u!1 &898988452
 GameObject:
   m_ObjectHideFlags: 0
@@ -14921,7 +14937,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1319924858}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 5.9799995, y: 11.2, z: -10}
+  m_LocalPosition: {x: 15.139999, y: 10.71, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1499935135}
