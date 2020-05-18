@@ -1,262 +1,187 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using TMPro.EditorUtilities;
-using Unity.Mathematics;
+﻿using System.Collections;
 using UnityEngine;
-using UnityEngine.Events;
-using Random = UnityEngine.Random;
 
 public class CharacterMovement : MonoBehaviour {
     
     private Rigidbody2D rb;
-    private Transform transform;
     private Animator anim;
     
     [Header("Colliders")]
-    [SerializeField] private BoxCollider2D BodyTrigger;
-    [SerializeField] private BoxCollider2D UpperBodyTrigger;
-    [SerializeField] private CapsuleCollider2D CharacterBodyCollider;
+    private CapsuleCollider2D CharacterCollider;
+    private BoxCollider2D UpperBodyCollider;
     
     [Header("Checks")]
-    [SerializeField] private Transform CeilingCheck;
-    [SerializeField] private Transform HandsCheck;
     [SerializeField] private Transform GroundCheck;
-    [SerializeField] private Transform UnderGroundCheck;
+    [SerializeField] private Transform WallCheck;
     [SerializeField] private float groundCheckDistance;
-    [SerializeField] private float climbCheckDistance;
+    [SerializeField] private float wallCheckDistance;
     [SerializeField] private float saveFallDistance;
     
     [Header("Layermasks")]
     [SerializeField] private LayerMask WhatIsGround;
-    [SerializeField] private LayerMask WhatIsLadder;
-    [SerializeField] private LayerMask WhatIsCeiling;
-
+    
     [Header("Movement parameters")]
     [SerializeField] private float moveSpeed;
     [SerializeField] private float walkSpeedMult;
-    [SerializeField] private float crouchSpeedMult;
     [SerializeField] private float inJumpSpeedMult;
-    [SerializeField] private float climbSpeed;
     [SerializeField] private float jumpForce;
+    [SerializeField] private int extraJumpsMax;
+    [SerializeField] private float dodgeTime;
     
     private float velocityDeadZoneX = 0.01f;
-    private float velocityDeadZoneY = 0.1f;
-    private float fallingVelocity = -5f;
-    [SerializeField]private bool isFacingRight;
-    [SerializeField]private bool isGrounded;
-    [SerializeField]private bool isRunning;
-    [SerializeField]private bool isWalking;
-    [SerializeField]private bool isJumping;
-    [SerializeField]private bool isClimbing;
-    [SerializeField]private bool isClimbingIdle;
-    [SerializeField]private bool isCrouching;
-    private bool isDodging;
-    private bool isHurted;
-    [SerializeField]private bool isFalling;
+    private float velocityDeadZoneY = 0.01f;
+    
+    [SerializeField] private bool isFacingRight;
+    [SerializeField] private bool isGrounded;
+    [SerializeField] private bool isTouchingWall;
+    [SerializeField] private bool isWalking;
+    [SerializeField] private bool isJumping;
+    [SerializeField] private bool isCrouching;
+    [SerializeField] private bool isFalling;
+    [SerializeField] private bool isDodging;
+    [SerializeField] private bool isShooting;
 
-    private bool isOnLadder;
-    private bool isCeilinged;
-    private bool isJumpable;
-    private bool isClimbableUp;
-    private bool isClimbableDown;
-    private bool isClimbable;
-    private float prevPosition;
-    [SerializeField]private int extraJumps;
-    
-    
-    
-    
+    [Space]
+    public bool actionsRestricted;
+    [SerializeField] bool canMove;
+    [SerializeField]private bool canJump;
+    [SerializeField]private bool canCrouch;
+    [SerializeField]private bool canDodge;
+    [SerializeField]private float prevPositionY;
+    [SerializeField]private float nextMovementX;
+    private int extraJumpsLeft;
+        
     
     
     private void Awake() {
         rb = GetComponent<Rigidbody2D>();
-        transform = GetComponent<Transform>();
-        CharacterBodyCollider = GetComponent<CapsuleCollider2D>();
+        CharacterCollider = GetComponent<CapsuleCollider2D>();
+        UpperBodyCollider = GetComponent<BoxCollider2D>();
         anim = GetComponent<Animator>();
         
-        StateHandle();
+        UpdateState();
         isFacingRight = true;
         isJumping = false;
-        isClimbing = false;
-        isCrouching = false;
         isDodging = false;
-        isHurted = false;
+        isShooting = false;
     }
     private void FixedUpdate() {
        
-        StateHandle();
+        UpdateState();
         UpdateAnimations();
-
     }
 
-    #region Character State
-    public void StateHandle() {
+    
+    public void UpdateState() {
         bool wasGrounded = isGrounded;
         isGrounded = CheckIsGrounded();
-        isCeilinged = CheckIsCeilinged();
-        isClimbable = CheckClimbableDown() || CheckClimbableUp();
-        if (!isClimbable) isOnLadder = false;
-        isJumpable = (isGrounded || isClimbing || (extraJumps > 0 && isJumping));
-        if (UpperBodyTrigger != null) UpperBodyTrigger.enabled = !(isCrouching || isJumping);
-
-        if (!isOnLadder && !CheckSaveFall() && (CheckClimbableUp() && CheckClimbableDown())) StartClimb();
-        if ((Mathf.Abs(rb.velocity.y) < velocityDeadZoneY) && isOnLadder && !isClimbing && isClimbable) StartClimb();
-        isFalling = (!isJumping && !isClimbing && (rb.velocity.y < fallingVelocity));
-        
-
-        if (!wasGrounded && isGrounded && (rb.position.y < prevPosition)) OnLanding();
-        if (isClimbing || isClimbingIdle) rb.gravityScale = 0;
-            else rb.gravityScale = 1f;
-        CharacterBodyCollider.enabled = !isClimbing;
-        UpperBodyTrigger.enabled = !(isCrouching || isJumping);
-        prevPosition = rb.position.y;
+        isFalling = !isJumping && !isGrounded && rb.position.y < prevPositionY;
+        canMove = !isCrouching && !actionsRestricted;
+        canJump = (isGrounded || (extraJumpsLeft > 0 && isJumping)) && !actionsRestricted;
+        canCrouch = isGrounded && !isJumping && !isDodging && !actionsRestricted;
+        canDodge = isGrounded && !actionsRestricted;
+        if (!wasGrounded && isGrounded && (rb.position.y <= prevPositionY)) OnLanding();
+        prevPositionY = rb.position.y;
     }
     private bool CheckIsGrounded() {
-        return (Physics2D.Raycast(GroundCheck.position, Vector2.down,  groundCheckDistance, WhatIsGround))
-            && !(Physics2D.Raycast(GroundCheck.position, Vector2.up,  groundCheckDistance, WhatIsGround));
-    }
-    private bool CheckIsCeilinged() {
-        return Physics2D.OverlapCircle(CeilingCheck.position,  groundCheckDistance, WhatIsCeiling);
+        return (Physics2D.Raycast(GroundCheck.position, Vector2.down,  groundCheckDistance, WhatIsGround));
     }
     
-    private bool CheckClimbableUp() {
-        return (Physics2D.Raycast(UnderGroundCheck.position, Vector2.up, climbCheckDistance, WhatIsLadder) || 
-               Physics2D.Raycast(HandsCheck.position, Vector2.up, climbCheckDistance, WhatIsLadder)) && !isCeilinged;
-    }
-    
-    private bool CheckClimbableDown() {
-        return Physics2D.Raycast(UnderGroundCheck.position, Vector2.up, climbCheckDistance, WhatIsLadder) &&
-                Physics2D.Raycast(HandsCheck.position, Vector2.down, climbCheckDistance, WhatIsLadder);
-    }
-    private bool CheckSaveFall() {
-        return Physics2D.Raycast(GroundCheck.position, Vector2.down, saveFallDistance, WhatIsGround);
-    }
-
-    
-    #endregion
-   
-    #region Movement Handle
-    
-    public void MoveLeftRight(float moveDirectionX_, bool walkCondition_) {
-        float totalSpeed_ =  moveSpeed * moveDirectionX_;
+    public void Move(float moveDirectionX_, bool walkCondition_) {
+        if (!canMove) {
+            nextMovementX = 0f;
+            rb.velocity = new Vector2(0f, rb.velocity.y);
+            return;
+        }
+        nextMovementX =  moveSpeed * moveDirectionX_;
         isWalking = walkCondition_;
-        if (isClimbing) totalSpeed_ = 0f;
-            else if (isCrouching)  totalSpeed_ *= crouchSpeedMult; 
-                else if (isJumping) totalSpeed_ *= inJumpSpeedMult; 
+        if (isJumping) nextMovementX *= inJumpSpeedMult; 
                     else if (walkCondition_) 
-                        totalSpeed_ *= walkSpeedMult;
-        isRunning = (Mathf.Abs(moveDirectionX_) > velocityDeadZoneX);        
-        rb.velocity = new Vector2(totalSpeed_, rb.velocity.y);
-        FlipIfWrongFacing(totalSpeed_);
+                        nextMovementX *=walkSpeedMult;
+        rb.velocity = new Vector2(nextMovementX, rb.velocity.y);
+        if (isGrounded)FlipIfWrongFacing(nextMovementX);
     }
-    private void FlipIfWrongFacing(float moveDirection_)
+    private void FlipIfWrongFacing(float xDirection_)
     {
-        if (!isFacingRight && moveDirection_ > 0) {
+        if (!isFacingRight && xDirection_ > 0) {
             Flip();
-        } else if (isFacingRight  && moveDirection_ < 0) Flip();
+        } else if (isFacingRight  && xDirection_ < 0) Flip();
     }
     private void Flip() {
         isFacingRight = !isFacingRight;
-        Vector3 objScale = transform.localScale;
-        objScale.x *= -1;
-        transform.localScale = objScale;
-    }
-    
-    public void MoveUpDown(float moveDirectionY_, bool jumpDownCondition) {
-        bool isClimbableUp = moveDirectionY_ > 0 && CheckClimbableUp();
-        bool isClimbableDown = (moveDirectionY_ < 0 && CheckClimbableDown() && (isClimbing || jumpDownCondition));
-        isClimbingIdle = isClimbing && moveDirectionY_ == 0;
-        if (isClimbableUp || isClimbableDown || isClimbingIdle) {
-            if (!isClimbing) StartClimb();
-            rb.velocity = new Vector2(rb.velocity.x, moveDirectionY_ * climbSpeed);
-        }
-        else
-            isClimbing = false;
-
-        if (!isClimbableDown && isGrounded) 
-            if (moveDirectionY_ <0) Crouch(); else UnCrouch();
-    }
-    
-    private void StartClimb() {
-        isJumping = false;
-        isFalling = false;
-        isClimbing = true;
-        isOnLadder = true;
-        rb.gravityScale = 0;
-        StartCoroutine(MoveToLadderPosition());
-    }
-    
-    IEnumerator MoveToLadderPosition() {
-        float curPosition_ = rb.position.x;
-        float desiredPos_ = Mathf.Floor(rb.position.x) + 0.5f;
-        for (int i = 1; i <= 15; i++) {
-            rb.position = new Vector2(rb.position.x - ((curPosition_ - desiredPos_) / 15), rb.position.y);
-            yield return new WaitForSeconds(.01f);
-        }
-        rb.position = new Vector2(desiredPos_, rb.position.y);
+        transform.Rotate(0, 180, 0);
     }
     
     private void OnLanding() {
-        isOnLadder = false;
         isJumping = false;
         if (isFalling) anim.SetTrigger("LandedFromFall");
-        isFalling = false;    
+        isFalling = false;
+        anim.speed = 1f;
         Debug.Log("Landed");
     }
     
-    #endregion
-
-    #region Character Actions
-
     public void Jump() {
-        if (!isJumpable) return;
-        extraJumps--;
+        if (!canJump) return;
+        UnCrouch();
         if (isGrounded)
-            extraJumps = 1;
-        else
-            extraJumps = 0;
-        isClimbing = false;
+            extraJumpsLeft = extraJumpsMax;
+        else {
+            extraJumpsLeft--;
+            anim.speed = 2f;
+        }
         isJumping = true;
         rb.velocity = new Vector2(rb.velocity.x, jumpForce);
-        FlipIfWrongFacing(rb.velocity.x);
+        FlipIfWrongFacing(nextMovementX);
         
     }
 
     public void Crouch() {
-        isCrouching = true;
-        UpperBodyTrigger.enabled = false;
+        if (!canCrouch) return;
+        if (!isJumping) isCrouching = true;
+        UpperBodyCollider.enabled = false;
     }
+    
     public void UnCrouch() {
+        if (!isCrouching) return;
         isCrouching = false;
-        UpperBodyTrigger.enabled = true;
+        UpperBodyCollider.enabled = true;
     }
-    #endregion
 
-    #region Animations Handle
+    public void Dodge() {
+        if (!canDodge) return;
+        UnCrouch();
+        if (!isDodging) StartCoroutine(TimedDodge(dodgeTime));
 
+    }
+
+    IEnumerator TimedDodge(float dodgeTime_) {
+        actionsRestricted = true;
+        isDodging = true;
+        anim.speed = 1 / dodgeTime_;
+        yield return new WaitForSeconds(dodgeTime_);
+        isDodging = false;
+        actionsRestricted = false;
+        anim.speed = 1f;
+
+    }
+
+    
     private void UpdateAnimations() {
-        anim.SetBool("isRunning", isRunning);
+        anim.SetFloat("MoveSpeed", Mathf.Abs(nextMovementX));
         anim.SetBool("isWalking", isWalking);
         anim.SetBool("isJumping", isJumping);
-        anim.SetInteger("ExtraJumps", extraJumps);
-        anim.SetBool("isClimbing", isClimbing);
-        anim.SetBool("isClimbingIdle", isClimbingIdle);
         anim.SetBool("isCrouching", isCrouching);
         anim.SetBool("isFalling", isFalling);
+        anim.SetBool("isDodging", isDodging);
     }
-
-    #endregion
     
     private void OnDrawGizmos() {
-        Gizmos.color = Color.blue;
-        Gizmos.DrawWireSphere(HandsCheck.position, climbCheckDistance);
-        Gizmos.DrawWireSphere(UnderGroundCheck.position, climbCheckDistance);
+       //groundCheck
         Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(GroundCheck.position, groundCheckDistance);
-        Gizmos.DrawWireSphere(CeilingCheck.position, groundCheckDistance);
-        Gizmos.color = Color.green;
-        Gizmos.DrawWireSphere(GroundCheck.position, saveFallDistance);
-
+        Gizmos.DrawLine(GroundCheck.position, GroundCheck.position + Vector3.down * groundCheckDistance);
+        //wallCheck
+        
+        Gizmos.color = Color.magenta;
+        Gizmos.DrawLine(WallCheck.position, WallCheck.position + Vector3.right * wallCheckDistance);
     }
 }
