@@ -20780,7 +20780,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 816988588}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: -0.3, z: 0}
+  m_LocalPosition: {x: 0, y: -0.2696, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 255889267}
@@ -21468,7 +21468,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f7c9409941ed6b440a04f872ac7446fe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  character: {fileID: 894563112}
   xInput: 0
   yInput: 0
   crouchButton: 0
@@ -21505,9 +21504,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   GroundCheck: {fileID: 816988589}
   WallCheck: {fileID: 555967717}
-  groundCheckDistance: 0.21
+  groundCheckDistance: 0.27
+  isGrounded: 0
   wallCheckDistance: 0.4
-  saveFallDistance: 6
+  isTouchingWall: 0
   WhatIsGround:
     serializedVersion: 2
     m_Bits: 2048
@@ -21517,22 +21517,20 @@ MonoBehaviour:
   jumpForce: 6
   extraJumpsMax: 1
   dodgeTime: 0.5
-  isFacingRight: 0
-  isGrounded: 0
-  isTouchingWall: 0
-  isWalking: 0
+  noDamageFallVelocity: 10
+  isFacingRight: 1
   isJumping: 0
-  isCrouching: 0
   isFalling: 0
   isDodging: 0
   isShooting: 0
+  isCrouching: 0
+  isWalking: 0
   actionsRestricted: 0
   canMove: 0
   canJump: 0
   canCrouch: 0
   canDodge: 0
-  prevPositionY: 0
-  nextMovementX: 0
+  canShoot: 0
 --- !u!1 &1121680274
 GameObject:
   m_ObjectHideFlags: 0

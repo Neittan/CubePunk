@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 public class CharacterMovement : MonoBehaviour {
@@ -14,8 +15,9 @@ public class CharacterMovement : MonoBehaviour {
     [SerializeField] private Transform GroundCheck;
     [SerializeField] private Transform WallCheck;
     [SerializeField] private float groundCheckDistance;
+    [SerializeField] private bool isGrounded;
     [SerializeField] private float wallCheckDistance;
-    [SerializeField] private float saveFallDistance;
+    [SerializeField] private bool isTouchingWall;
     
     [Header("Layermasks")]
     [SerializeField] private LayerMask WhatIsGround;
@@ -27,69 +29,88 @@ public class CharacterMovement : MonoBehaviour {
     [SerializeField] private float jumpForce;
     [SerializeField] private int extraJumpsMax;
     [SerializeField] private float dodgeTime;
+    [SerializeField]private int noDamageFallVelocity;
     
-    private float velocityDeadZoneX = 0.01f;
-    private float velocityDeadZoneY = 0.01f;
+    [Header("State")]
+    [SerializeField] private bool isFacingRight = true;
+    [SerializeField] private bool isJumping = false;
+    [SerializeField] private bool isFalling  = false;
+    [SerializeField] private bool isDodging  = false;
+    [SerializeField] private bool isShooting  = false;
+    [SerializeField] private bool isCrouching = false;
     
-    [SerializeField] private bool isFacingRight;
-    [SerializeField] private bool isGrounded;
-    [SerializeField] private bool isTouchingWall;
     [SerializeField] private bool isWalking;
-    [SerializeField] private bool isJumping;
-    [SerializeField] private bool isCrouching;
-    [SerializeField] private bool isFalling;
-    [SerializeField] private bool isDodging;
-    [SerializeField] private bool isShooting;
 
-    [Space]
+    [Header("Move Restrictions")]
     public bool actionsRestricted;
-    [SerializeField] bool canMove;
-    [SerializeField]private bool canJump;
-    [SerializeField]private bool canCrouch;
-    [SerializeField]private bool canDodge;
-    [SerializeField]private float prevPositionY;
-    [SerializeField]private float nextMovementX;
+    [SerializeField] private bool canMove;
+    [SerializeField] private bool canJump;
+    [SerializeField] private bool canCrouch;
+    [SerializeField] private bool canDodge;
+    [SerializeField] private bool canShoot;
+    
+    //=========================
+    private float prevPositionY;
+    private float curFallVelocity;
+    private float nextMovementX;
     private int extraJumpsLeft;
         
     
     
     private void Awake() {
         rb = GetComponent<Rigidbody2D>();
+        anim = GetComponent<Animator>();
         CharacterCollider = GetComponent<CapsuleCollider2D>();
         UpperBodyCollider = GetComponent<BoxCollider2D>();
-        anim = GetComponent<Animator>();
         
-        UpdateState();
-        isFacingRight = true;
-        isJumping = false;
-        isDodging = false;
-        isShooting = false;
-    }
+        anim.SetInteger("NoDamageVelocity", noDamageFallVelocity);
+    } 
+    //======================================================================================
     private void FixedUpdate() {
-       
         UpdateState();
         UpdateAnimations();
     }
-
+    //======================================================================================
     
     public void UpdateState() {
         bool wasGrounded = isGrounded;
         isGrounded = CheckIsGrounded();
+        CheckFallVelocity();
         isFalling = !isJumping && !isGrounded && rb.position.y < prevPositionY;
-        canMove = !isCrouching && !actionsRestricted;
-        canJump = (isGrounded || (extraJumpsLeft > 0 && isJumping)) && !actionsRestricted;
-        canCrouch = isGrounded && !isJumping && !isDodging && !actionsRestricted;
-        canDodge = isGrounded && !actionsRestricted;
-        if (!wasGrounded && isGrounded && (rb.position.y <= prevPositionY)) OnLanding();
+        CheckActionsRestrictions();
+        if (!wasGrounded && isGrounded && (rb.position.y < prevPositionY)) DoOnLanding();
         prevPositionY = rb.position.y;
+        
     }
     private bool CheckIsGrounded() {
-        return (Physics2D.Raycast(GroundCheck.position, Vector2.down,  groundCheckDistance, WhatIsGround));
+        return Physics2D.OverlapCircle(GroundCheck.position, groundCheckDistance, WhatIsGround);
+    }
+    private void CheckFallVelocity() {
+        if (rb.velocity.y < curFallVelocity) curFallVelocity = rb.velocity.y;
+        if (Mathf.Approximately(rb.velocity.y, 0f)) curFallVelocity = 0;
+    }
+    private void CheckActionsRestrictions() {
+        if (actionsRestricted) {
+            canMove = false;
+            canJump = false;
+            canCrouch = false;
+            canDodge = false;
+            canShoot = false;
+        }
+        else {
+            canMove = !isCrouching;
+            canJump = isGrounded || (extraJumpsLeft > 0 && isJumping);
+            canCrouch = isGrounded && !isJumping && !isDodging;
+            canDodge = isGrounded;
+            canShoot = true;
+        }
     }
     
+    //======================================================================================
     public void Move(float moveDirectionX_, bool walkCondition_) {
+        if (isGrounded)FlipIfWrongFacing(moveDirectionX_);
         if (!canMove) {
-            nextMovementX = 0f;
+            nextMovementX = 0;
             rb.velocity = new Vector2(0f, rb.velocity.y);
             return;
         }
@@ -99,7 +120,6 @@ public class CharacterMovement : MonoBehaviour {
                     else if (walkCondition_) 
                         nextMovementX *=walkSpeedMult;
         rb.velocity = new Vector2(nextMovementX, rb.velocity.y);
-        if (isGrounded)FlipIfWrongFacing(nextMovementX);
     }
     private void FlipIfWrongFacing(float xDirection_)
     {
@@ -112,13 +132,7 @@ public class CharacterMovement : MonoBehaviour {
         transform.Rotate(0, 180, 0);
     }
     
-    private void OnLanding() {
-        isJumping = false;
-        if (isFalling) anim.SetTrigger("LandedFromFall");
-        isFalling = false;
-        anim.speed = 1f;
-        Debug.Log("Landed");
-    }
+    
     
     public void Jump() {
         if (!canJump) return;
@@ -134,38 +148,42 @@ public class CharacterMovement : MonoBehaviour {
         FlipIfWrongFacing(nextMovementX);
         
     }
-
     public void Crouch() {
         if (!canCrouch) return;
         if (!isJumping) isCrouching = true;
         UpperBodyCollider.enabled = false;
     }
-    
     public void UnCrouch() {
         if (!isCrouching) return;
         isCrouching = false;
         UpperBodyCollider.enabled = true;
     }
-
     public void Dodge() {
         if (!canDodge) return;
         UnCrouch();
         if (!isDodging) StartCoroutine(TimedDodge(dodgeTime));
 
     }
-
     IEnumerator TimedDodge(float dodgeTime_) {
-        actionsRestricted = true;
         isDodging = true;
         anim.speed = 1 / dodgeTime_;
         yield return new WaitForSeconds(dodgeTime_);
         isDodging = false;
-        actionsRestricted = false;
-        anim.speed = 1f;
-
+        anim.speed = 1;
     }
-
-    
+    IEnumerator RestrictAllActions(float restrictTime_) {
+        actionsRestricted = true;
+        yield return new WaitForSeconds(restrictTime_);
+        actionsRestricted = false;
+    }
+    //======================================================================================
+    private void DoOnLanding() {
+        isJumping = false;
+        isFalling = false;
+        anim.speed = 1f;
+        curFallVelocity = 0;
+    }
+    //======================================================================================
     private void UpdateAnimations() {
         anim.SetFloat("MoveSpeed", Mathf.Abs(nextMovementX));
         anim.SetBool("isWalking", isWalking);
@@ -174,14 +192,14 @@ public class CharacterMovement : MonoBehaviour {
         anim.SetBool("isFalling", isFalling);
         anim.SetBool("isDodging", isDodging);
     }
-    
+    //======================================================================================
     private void OnDrawGizmos() {
        //groundCheck
         Gizmos.color = Color.red;
-        Gizmos.DrawLine(GroundCheck.position, GroundCheck.position + Vector3.down * groundCheckDistance);
+        Gizmos.DrawWireSphere(GroundCheck.position, groundCheckDistance);
         //wallCheck
-        
         Gizmos.color = Color.magenta;
         Gizmos.DrawLine(WallCheck.position, WallCheck.position + Vector3.right * wallCheckDistance);
+        //cliffCheck
     }
 }
