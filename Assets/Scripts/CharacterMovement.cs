@@ -15,7 +15,6 @@ public class CharacterMovement : MonoBehaviour {
     [SerializeField] private Transform GroundCheck;
     [SerializeField] private Transform WallCheck;
     [SerializeField] private float groundCheckDistance;
-    [SerializeField] private bool isGrounded;
     [SerializeField] private float wallCheckDistance;
     [SerializeField] private bool isTouchingWall;
     
@@ -29,17 +28,18 @@ public class CharacterMovement : MonoBehaviour {
     [SerializeField] private float jumpForce;
     [SerializeField] private int extraJumpsMax;
     [SerializeField] private float dodgeTime;
-    [SerializeField]private int noDamageFallVelocity;
+    [SerializeField] private float noDamageFallVelocity;
     
     [Header("State")]
     [SerializeField] private bool isFacingRight = true;
+    [SerializeField] private bool isGrounded;
+    [SerializeField] private bool isWalking;
     [SerializeField] private bool isJumping = false;
     [SerializeField] private bool isFalling  = false;
     [SerializeField] private bool isDodging  = false;
     [SerializeField] private bool isShooting  = false;
     [SerializeField] private bool isCrouching = false;
     
-    [SerializeField] private bool isWalking;
 
     [Header("Move Restrictions")]
     public bool actionsRestricted;
@@ -50,6 +50,7 @@ public class CharacterMovement : MonoBehaviour {
     [SerializeField] private bool canShoot;
     
     //=========================
+    private bool wasGrounded;
     private float prevPositionY;
     private float curFallVelocity;
     private float nextMovementX;
@@ -62,8 +63,6 @@ public class CharacterMovement : MonoBehaviour {
         anim = GetComponent<Animator>();
         CharacterCollider = GetComponent<CapsuleCollider2D>();
         UpperBodyCollider = GetComponent<BoxCollider2D>();
-        
-        anim.SetInteger("NoDamageVelocity", noDamageFallVelocity);
     } 
     //======================================================================================
     private void FixedUpdate() {
@@ -76,7 +75,7 @@ public class CharacterMovement : MonoBehaviour {
         bool wasGrounded = isGrounded;
         isGrounded = CheckIsGrounded();
         CheckFallVelocity();
-        isFalling = !isJumping && !isGrounded && rb.position.y < prevPositionY;
+        isFalling = !isJumping && !isGrounded && (curFallVelocity > noDamageFallVelocity);
         CheckActionsRestrictions();
         if (!wasGrounded && isGrounded && (rb.position.y < prevPositionY)) DoOnLanding();
         prevPositionY = rb.position.y;
@@ -131,9 +130,6 @@ public class CharacterMovement : MonoBehaviour {
         isFacingRight = !isFacingRight;
         transform.Rotate(0, 180, 0);
     }
-    
-    
-    
     public void Jump() {
         if (!canJump) return;
         UnCrouch();
