@@ -1,12 +1,14 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using UnityEditor.PackageManager;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
+using UnityEngine.PlayerLoop;
 
 public class PlayerInput : MonoBehaviour {
 
-    private CharacterMovement movement;
+    private CharacterController2D character;
     
     [Header("Input")]
     [SerializeField] private float xInput;
@@ -19,31 +21,33 @@ public class PlayerInput : MonoBehaviour {
     [SerializeField] private bool dodgeButton;
 
     private void Awake() {
-        movement = GetComponent<CharacterMovement>();
-    }
-
-    private void FixedUpdate() {
-        xInput = Input.GetAxisRaw("Horizontal");
-        yInput = Input.GetAxisRaw("Vertical");
-        
-        movement.Move(xInput * Time.fixedDeltaTime, walkButton);
+        character = GetComponent<CharacterController2D>();
     }
 
     private void Update() {
+        CheckInput();
+        ApplyMovement();
+        ApplyActions();
+    }
+
+    private void CheckInput() {
+        xInput = Input.GetAxisRaw("Horizontal");
+        yInput = Input.GetAxisRaw("Vertical");
         crouchButton = Input.GetKey(KeyCode.S);
         walkButton = Input.GetKey(KeyCode.LeftShift);
         jumpButton = Input.GetKeyDown(KeyCode.Space);
-        dodgeButton = Input.GetKey(KeyCode.Q);
-        
-        if (jumpButton) movement.Jump();
-        if (crouchButton) movement.Crouch(); else movement.UnCrouch();
-        if (dodgeButton) movement.Dodge();
-        
-        
-        
-        
+        dodgeButton = Input.GetKey(KeyCode.LeftControl);
+    }
 
-}
+    private void ApplyMovement() {
+        character.Move(xInput * Time.fixedDeltaTime, walkButton);
+    }
+
+    private void ApplyActions() {
+        if (jumpButton) character.Jump();
+        if (crouchButton) character.Crouch(); else character.UnCrouch();
+        if (dodgeButton) character.Dodge();
+    }
 
 }
 
