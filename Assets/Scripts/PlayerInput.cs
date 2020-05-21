@@ -8,7 +8,7 @@ using UnityEngine.PlayerLoop;
 
 public class PlayerInput : MonoBehaviour {
 
-    private CharacterController2D character;
+    private CharacterMovement movement;
     
     [Header("Input")]
     [SerializeField] private float xInput;
@@ -21,13 +21,12 @@ public class PlayerInput : MonoBehaviour {
     [SerializeField] private bool dodgeButton;
 
     private void Awake() {
-        character = GetComponent<CharacterController2D>();
+        movement = GetComponent<CharacterMovement>();
     }
 
     private void Update() {
         CheckInput();
         ApplyMovement();
-        ApplyActions();
     }
 
     private void CheckInput() {
@@ -40,13 +39,11 @@ public class PlayerInput : MonoBehaviour {
     }
 
     private void ApplyMovement() {
-        character.Move(xInput * Time.fixedDeltaTime, walkButton);
-    }
-
-    private void ApplyActions() {
-        if (jumpButton) character.Jump();
-        if (crouchButton) character.Crouch(); else character.UnCrouch();
-        if (dodgeButton) character.Dodge();
+        movement.Move(xInput * Time.fixedDeltaTime, walkButton);
+    
+        if (jumpButton) movement.Jump();
+        movement.Crouch(crouchButton);
+        if (dodgeButton) movement.Dodge();
     }
 
 }
