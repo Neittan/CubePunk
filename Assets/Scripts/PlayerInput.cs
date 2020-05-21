@@ -24,9 +24,13 @@ public class PlayerInput : MonoBehaviour {
         movement = GetComponent<CharacterMovement>();
     }
 
+    private void FixedUpdate() {
+        ApplyMovement();
+    }
+
     private void Update() {
         CheckInput();
-        ApplyMovement();
+        ApplyActions();
     }
 
     private void CheckInput() {
@@ -40,10 +44,11 @@ public class PlayerInput : MonoBehaviour {
 
     private void ApplyMovement() {
         movement.Move(xInput * Time.fixedDeltaTime, walkButton);
-    
-        if (jumpButton) movement.Jump();
-        movement.Crouch(crouchButton);
-        if (dodgeButton) movement.Dodge();
+    }
+    private void ApplyActions(){
+    if (jumpButton) movement.Jump();
+    movement.Crouch(crouchButton);
+    if (dodgeButton) movement.Dodge();
     }
 
 }

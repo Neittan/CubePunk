@@ -22903,14 +22903,14 @@ MonoBehaviour:
     m_Bits: 2048
   moveSpeed: 400
   walkSpeedMult: 0.5
-  inJumpSpeedMult: 0.75
   jumpForce: 6
   extraJumpsMax: 1
-  dodgeTime: 0.5
+  inAirDragMult: 0.96
+  dodgeTime: 0.3
   noDamageFallVelocity: 10
   wallSlideSpeed: 0.3
   wallSlidesMax: 999
-  wallSlidesTimeLimit: 0
+  wallSlideTimeLimit: 1
   actionsRestricted: 0
 --- !u!1 &1121680274
 GameObject:
