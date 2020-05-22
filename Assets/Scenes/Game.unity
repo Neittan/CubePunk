@@ -22920,10 +22920,10 @@ MonoBehaviour:
   noDamageFallVelocity: 15
   wallSlideSpeed: 0.2
   wallSlideTimeLimit: 0.5
-  dashSpeed: 30
-  dashDuration: 0.2
-  distanceBetweenImages: 0.5
-  dashCooldown: 2
+  dashSpeed: 40
+  dashDuration: 0.25
+  distanceBetweenImages: 1
+  dashCooldown: 1
   wallSlidesMax: 99
   extraJumpsMax: 1
   canMove: 0
@@ -23359,6 +23359,14 @@ PrefabInstance:
     - target: {fileID: 3680508562389235663, guid: b8a37853a51c8a94eb884172350f6926, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5029514250602818537, guid: b8a37853a51c8a94eb884172350f6926, type: 3}
+      propertyPath: activeTime
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5029514250602818537, guid: b8a37853a51c8a94eb884172350f6926, type: 3}
+      propertyPath: alphaMult
+      value: 0.95
       objectReference: {fileID: 0}
     - target: {fileID: 5823373685293720305, guid: b8a37853a51c8a94eb884172350f6926, type: 3}
       propertyPath: m_Name
