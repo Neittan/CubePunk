@@ -52,6 +52,8 @@
   </PropertyGroup>
   <ItemGroup>
      <Compile Include="Assets\Scripts\CharacterMovement.cs" />
+     <Compile Include="Assets\Scripts\PlayerAfterimage.cs" />
+     <Compile Include="Assets\Scripts\PlayerAfterimagePool.cs" />
      <Compile Include="Assets\Scripts\PlayerInput.cs" />
  <Reference Include="UnityEngine">
  <HintPath>E:/Unity/2020.2.0a8/Editor/Data/Managed/UnityEngine/UnityEngine.dll</HintPath>

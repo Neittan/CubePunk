@@ -1,10 +1,5 @@
-﻿using System;
-using System.Runtime.CompilerServices;
-using UnityEditor.PackageManager;
-using UnityEngine;
-using UnityEngine.Events;
-using UnityEngine.EventSystems;
-using UnityEngine.PlayerLoop;
+﻿using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class PlayerInput : MonoBehaviour {
 
@@ -15,16 +10,16 @@ public class PlayerInput : MonoBehaviour {
     [SerializeField] private float yInput;
     
     [Header("Buttons")]
-    [SerializeField] private bool crouchButton;
-    [SerializeField] private bool walkButton;
-    [SerializeField] private bool jumpButton;
-    [SerializeField] private bool dodgeButton;
+    private KeyCode resetLevel;
+
+    private bool actionsInputDisabled;
 
     private void Awake() {
         movement = GetComponent<CharacterMovement>();
     }
 
     private void FixedUpdate() {
+        
         ApplyMovement();
     }
 
@@ -36,20 +31,40 @@ public class PlayerInput : MonoBehaviour {
     private void CheckInput() {
         xInput = Input.GetAxisRaw("Horizontal");
         yInput = Input.GetAxisRaw("Vertical");
-        crouchButton = Input.GetKey(KeyCode.S);
-        walkButton = Input.GetKey(KeyCode.LeftShift);
-        jumpButton = Input.GetKeyDown(KeyCode.Space);
-        dodgeButton = Input.GetKey(KeyCode.LeftControl);
+        resetLevel = KeyCode.F12;
+        
     }
 
     private void ApplyMovement() {
-        movement.Move(xInput * Time.fixedDeltaTime, walkButton);
+        if (movement.ActionsIsDisabled()) return;
+        movement.Move(xInput * Time.fixedDeltaTime);
     }
-    private void ApplyActions(){
-    if (jumpButton) movement.Jump();
-    movement.Crouch(crouchButton);
-    if (dodgeButton) movement.Dodge();
-    }
+    private void ApplyActions() {
+        if (movement.ActionsIsDisabled()) return;
+        if (Input.GetKeyDown(resetLevel)) SceneManager.LoadScene(0);
+        
+        if (Input.GetButton("Walk")) {
+            movement.WalkON();
+        } else movement.WalkOFF();
+        
+        if (Input.GetButtonDown("Jump")) {
+            movement.Jump();
+        }
+        if (Input.GetButtonUp("Jump")) {
+            movement.VariableJump();
+        }
+        
+        if (Input.GetButtonDown("Dodge")) {
+            movement.Dodge();
+        }
 
+        if (Input.GetButton("Crouch")) {
+            movement.Crouch();
+        } else movement.UnCrouch();
+
+        if (Input.GetButtonDown("Fire2")) movement.Dash();
+
+    }
+    
 }
 
