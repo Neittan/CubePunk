@@ -214,7 +214,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f8f7702c8a6265b4c93fd7cf98e19ceb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  afterimagePrefab: {fileID: 5823373685293720305, guid: b8a37853a51c8a94eb884172350f6926, type: 3}
+  afterimagePrefab: {fileID: 541571293}
 --- !u!4 &492885021
 Transform:
   m_ObjectHideFlags: 0
@@ -429,6 +429,11 @@ Transform:
   m_Father: {fileID: 1516107402}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &541571293 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5823373685293720305, guid: b8a37853a51c8a94eb884172350f6926, type: 3}
+  m_PrefabInstance: {fileID: 4731898897717759833}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &555967716
 GameObject:
   m_ObjectHideFlags: 0
@@ -22906,7 +22911,7 @@ MonoBehaviour:
   GroundCheck: {fileID: 816988589}
   WallCheck: {fileID: 555967717}
   groundCheckDistance: 0.27
-  wallCheckDistance: 0.4
+  wallCheckDistance: 0.5
   WhatIsGround:
     serializedVersion: 2
     m_Bits: 2048
@@ -22915,7 +22920,7 @@ MonoBehaviour:
   jumpForce: 8
   inJumpSpeedMult: 0.7
   variableJumpHeightMult: 1
-  inAirDragMult: 0.92
+  inAirDragMult: 0.99
   dodgeDuration: 0.5
   noDamageFallVelocity: 15
   wallSlideSpeed: 0.2
